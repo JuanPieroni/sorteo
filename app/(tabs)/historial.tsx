@@ -26,10 +26,12 @@ function HistoryCard({ item }: { item: DrawResult }) {
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.trophyBadge}>
-          <Text style={styles.trophyEmoji}>🏆</Text>
+          <Text style={styles.trophyEmoji}>🎲</Text>
         </View>
         <View style={styles.cardHeaderInfo}>
-          <Text style={styles.winnerName}>{item.winner.name}</Text>
+          <Text style={styles.winnerName}>
+            {item.mesas.length} Mesa{item.mesas.length !== 1 ? "s" : ""}
+          </Text>
           <Text style={styles.cardDate}>{formatDate(item.drawnAt)}</Text>
         </View>
       </View>
@@ -37,9 +39,14 @@ function HistoryCard({ item }: { item: DrawResult }) {
       <Text style={styles.participantsLabel}>
         {item.participants.length} participantes:
       </Text>
-      <Text style={styles.participantsList} numberOfLines={2}>
-        {item.participants.map((p) => p.name).join(", ")}
-      </Text>
+      {item.mesas.map((mesa) => (
+        <View key={mesa.mesaNumber} style={styles.mesaHistoryItem}>
+          <Text style={styles.mesaHistoryTitle}>Mesa {mesa.mesaNumber}:</Text>
+          <Text style={styles.mesaHistoryPlayers}>
+            {mesa.players.map((p) => p.name).join(", ")}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 }
@@ -152,6 +159,19 @@ const styles = StyleSheet.create({
   },
   participantsLabel: { ...typography.caption, marginBottom: 2 },
   participantsList: {
+    ...typography.bodySmall,
+    color: colors.text,
+    lineHeight: 20,
+  },
+  mesaHistoryItem: {
+    marginTop: spacing.xs,
+  },
+  mesaHistoryTitle: {
+    ...typography.caption,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+  mesaHistoryPlayers: {
     ...typography.bodySmall,
     color: colors.text,
     lineHeight: 20,

@@ -13,7 +13,7 @@ import { colors, spacing, borderRadius, typography, shadows } from "@/constants/
 
 export default function ResultadoScreen() {
   const router = useRouter();
-  const { lastWinner, participants } = useSorteoStore();
+  const { lastResult, participants } = useSorteoStore();
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -42,7 +42,7 @@ export default function ResultadoScreen() {
     ).start();
   }, []);
 
-  if (!lastWinner) {
+  if (!lastResult || !lastResult.mesas || lastResult.mesas.length === 0) {
     router.back();
     return null;
   }
@@ -65,14 +65,23 @@ export default function ResultadoScreen() {
             },
           ]}
         >
-          <Text style={styles.trophyEmoji}>🏆</Text>
-          <Text style={styles.winnerLabel}>¡El ganador es!</Text>
-          <Text style={styles.winnerName}>{lastWinner.name}</Text>
+          <Text style={styles.trophyEmoji}>🎲</Text>
+          <Text style={styles.winnerLabel}>¡Mesas organizadas!</Text>
+          
+          {/* Mostrar cada mesa */}
+          {lastResult.mesas.map((mesa) => (
+            <View key={mesa.mesaNumber} style={styles.mesaContainer}>
+              <Text style={styles.mesaTitle}>Mesa {mesa.mesaNumber} 🎯</Text>
+              <Text style={styles.mesaPlayers}>
+                {mesa.players.map((p) => p.name).join(", ")}
+              </Text>
+            </View>
+          ))}
         </Animated.View>
 
         <Animated.View style={[styles.info, { opacity: fadeAnim }]}>
           <Text style={styles.infoText}>
-            🎯 Elegido entre {participants.length} participantes
+            🎯 {participants.length} jugadores en {lastResult.mesas.length} mesa{lastResult.mesas.length !== 1 ? "s" : ""}
           </Text>
         </Animated.View>
 
@@ -135,6 +144,24 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: colors.primary,
     textAlign: "center",
+  },
+  mesaContainer: {
+    width: "100%",
+    backgroundColor: colors.primaryLight,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+  },
+  mesaTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  mesaPlayers: {
+    fontSize: 16,
+    color: colors.text,
+    lineHeight: 22,
   },
   info: {
     backgroundColor: "rgba(255,255,255,0.15)",

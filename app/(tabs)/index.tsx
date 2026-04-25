@@ -13,7 +13,7 @@ import { colors, spacing, borderRadius, typography, shadows } from "@/constants/
 
 export default function SorteoScreen() {
   const router = useRouter();
-  const { participants, drawWinner, lastWinner } = useSorteoStore();
+  const { participants, numberOfTables, setNumberOfTables, dividirEnMesas, lastResult } = useSorteoStore();
   const [isDrawing, setIsDrawing] = useState(false);
 
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -45,9 +45,9 @@ export default function SorteoScreen() {
         Animated.timing(shakeAnim, { toValue: 0, duration: 80, useNativeDriver: true }),
       ]),
     ]).start(() => {
-      const winner = drawWinner();
+      const result = dividirEnMesas();
       setIsDrawing(false);
-      if (winner) {
+      if (result) {
         router.push("/resultado");
       }
     });
@@ -70,10 +70,31 @@ export default function SorteoScreen() {
           <Text style={styles.statLabel}>Participantes</Text>
         </View>
         <View style={[styles.statCard, styles.statCardAccent]}>
-          <Text style={styles.statNumber}>
-            {participants.length > 0 ? `1/${participants.length}` : "—"}
-          </Text>
-          <Text style={styles.statLabel}>Premio</Text>
+          <Text style={styles.statNumber}>{numberOfTables}</Text>
+          <Text style={styles.statLabel}>Mesas</Text>
+        </View>
+      </View>
+
+      {/* Selector de Mesas */}
+      <View style={styles.mesasSelector}>
+        <Text style={styles.mesasSelectorLabel}>Número de mesas</Text>
+        <View style={styles.mesasSelectorButtons}>
+          <TouchableOpacity
+            style={[styles.mesasBtn, numberOfTables <= 1 && styles.mesasBtnDisabled]}
+            onPress={() => setNumberOfTables(numberOfTables - 1)}
+            disabled={numberOfTables <= 1}
+          >
+            <Text style={styles.mesasBtnText}>−</Text>
+          </TouchableOpacity>
+          <View style={styles.mesasNumber}>
+            <Text style={styles.mesasNumberText}>{numberOfTables}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.mesasBtn}
+            onPress={() => setNumberOfTables(numberOfTables + 1)}
+          >
+            <Text style={styles.mesasBtnText}>+</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -114,11 +135,13 @@ export default function SorteoScreen() {
         )}
       </View>
 
-      {/* Last Winner */}
-      {lastWinner && (
+      {/* Last Result */}
+      {lastResult && lastResult.mesas.length > 0 && (
         <View style={styles.lastWinnerBox}>
-          <Text style={styles.lastWinnerLabel}>🏆 Último ganador</Text>
-          <Text style={styles.lastWinnerName}>{lastWinner.name}</Text>
+          <Text style={styles.lastWinnerLabel}>🎲 Último sorteo</Text>
+          <Text style={styles.lastWinnerName}>
+            {lastResult.mesas.length} mesa{lastResult.mesas.length !== 1 ? "s" : ""} organizadas
+          </Text>
         </View>
       )}
     </SafeAreaView>
@@ -230,6 +253,51 @@ const styles = StyleSheet.create({
   },
   lastWinnerName: {
     ...typography.h3,
+    color: colors.primary,
+  },
+  mesasSelector: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    alignItems: "center",
+    ...shadows.sm,
+    gap: spacing.md,
+  },
+  mesasSelectorLabel: {
+    ...typography.bodySmall,
+    fontWeight: "600",
+  },
+  mesasSelectorButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  mesasBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    ...shadows.sm,
+  },
+  mesasBtnDisabled: {
+    backgroundColor: colors.border,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  mesasBtnText: {
+    color: colors.white,
+    fontSize: 24,
+    fontWeight: "600",
+  },
+  mesasNumber: {
+    minWidth: 60,
+    alignItems: "center",
+  },
+  mesasNumberText: {
+    fontSize: 32,
+    fontWeight: "700",
     color: colors.primary,
   },
 });
